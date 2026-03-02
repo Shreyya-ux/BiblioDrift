@@ -287,6 +287,7 @@ main {
 
 /* --- 3D Book Component --- */
 .book-scene {
+    position: relative;
     width: var(--book-width);
     height: var(--book-height);
     perspective: 1000px;
@@ -1833,6 +1834,7 @@ main {
 }
 
 .genre-book-card {
+    position: relative;
     background: var(--card-bg);
     border-radius: 12px;
     overflow: hidden;
@@ -6585,4 +6587,86 @@ main {
 .btn-outline:hover {
     background-color: var(--wood-dark);
     color: #fff;
+}
+
+ . b o o k - b a d g e - c o n t a i n e r   { 
+         p o s i t i o n :   a b s o l u t e ; 
+         t o p :   - 1 0 p x ; 
+         r i g h t :   - 1 0 p x ; 
+         d i s p l a y :   f l e x ; 
+         f l e x - d i r e c t i o n :   c o l u m n ; 
+         g a p :   5 p x ; 
+         z - i n d e x :   1 0 ; 
+         p o i n t e r - e v e n t s :   n o n e ; 
+ } 
+ 
+ . b o o k - b a d g e   { 
+         p a d d i n g :   4 p x   8 p x ; 
+         b o r d e r - r a d i u s :   1 2 p x ; 
+         f o n t - s i z e :   0 . 7 5 r e m ; 
+         f o n t - w e i g h t :   b o l d ; 
+         c o l o r :   w h i t e ; 
+         t e x t - t r a n s f o r m :   u p p e r c a s e ; 
+         b o x - s h a d o w :   0   2 p x   4 p x   r g b a ( 0 , 0 , 0 , 0 . 2 ) ; 
+         l e t t e r - s p a c i n g :   0 . 5 p x ; 
+ } 
+ 
+ . b a d g e - n e w   { 
+         b a c k g r o u n d - c o l o r :   # f f 4 7 5 7 ;   / *   B r i g h t   r e d   f o r   n e w   * / 
+ } 
+ 
+ . b a d g e - p o p u l a r   { 
+         b a c k g r o u n d - c o l o r :   # f f a 5 0 2 ;   / *   O r a n g e / g o l d   f o r   p o p u l a r   * / 
+ } 
+ 
+ . b a d g e - g e n r e   { 
+         b a c k g r o u n d - c o l o r :   # 2 e d 5 7 3 ;   / *   G r e e n   f o r   g e n r e ,   c o u l d   b e   d y n a m i c   * / 
+         / *   A d d   a   l i t t l e   m a x   w i d t h   i n   c a s e   o f   l o n g   g e n r e s   * / 
+         m a x - w i d t h :   8 0 p x ; 
+         w h i t e - s p a c e :   n o w r a p ; 
+         o v e r f l o w :   h i d d e n ; 
+         t e x t - o v e r f l o w :   e l l i p s i s ; 
+ } 
+ 
+ 
+ 
+
+
+.book-badge-container {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.book-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: white;
+    text-transform: uppercase;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    letter-spacing: 0.5px;
+}
+
+.badge-new {
+    background-color: #ff4757; /* Bright red for new */
+}
+
+.badge-popular {
+    background-color: #ffa502; /* Orange/gold for popular */
+}
+
+.badge-genre {
+    background-color: #2ed573; /* Green for genre, could be dynamic */
+    /* Add a little max width in case of long genres */
+    max-width: 80px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
