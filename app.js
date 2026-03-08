@@ -961,6 +961,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const performSearch = () => {
         if (searchInput && searchInput.value.trim()) {
+            // Reset pagination state for new search
+            currentSearchQuery = searchInput.value.trim();
+            currentStartIndex = 0;
+            hasMoreResults = true;
+            
             window.location.href = `index.html?q=${encodeURIComponent(searchInput.value.trim())}`;
         }
     };
@@ -1486,7 +1491,12 @@ class BooksellerRecommends {
 
 // Initialize keyboard shortcuts when DOM is ready
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => KeyboardShortcuts.init());
+    document.addEventListener('DOMContentLoaded', () => {
+        KeyboardShortcuts.init();
+        
+        // Initialize infinite scroll observer
+        setupInfiniteScrollObserver();
+    });
 } else {
     KeyboardShortcuts.init();
 }
@@ -1497,3 +1507,76 @@ let currentStartIndex = 0;
 const MAX_RESULTS = 20;
 let isFetching = false;
 let hasMoreResults = true;
+
+// Intersection Observer for Infinite Scroll
+function setupInfiniteScrollObserver() {
+    const sentinelElement = document.getElementById('scroll-sentinel');
+    if (!sentinelElement) return;
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                if (!isFetching && hasMoreResults && currentSearchQuery !== '') {
+                    // Remove hidden class to show spinner
+                    sentinelElement.classList.remove('hidden');
+                    
+                    // Increment index and fetch more results
+                    currentStartIndex += MAX_RESULTS;
+                    
+                    // Fetch next batch
+                    fetchNextBatch();
+                }
+            }
+        });
+    }, {
+        rootMargin: '0px 0px 200px 0px'
+    });
+    
+    observer.observe(sentinelElement);
+}
+
+// Fetch next batch of results
+async function fetchNextBatch() {
+    try {
+        isFetching = true;
+        
+        // Hide spinner after fetch completes
+        const hideSpinner = () => {
+            sentinelElement.classList.add('hidden');
+            isFetching = false;
+        };
+        
+        const res = await fetch(`${API_BASE}?q=${encodeURIComponent(currentSearchQuery)}&maxResults=${MAX_RESULTS}&startIndex=${currentStartIndex}`);
+        
+        if (!res.ok) {
+            throw new Error(`API Error: ${res.statusText}`);
+        }
+        
+        const data = await res.json();
+        
+        if (data.items && data.items.length > 0) {
+            const container = document.getElementById('search-results');
+            const renderer = new BookRenderer(window.libManager);
+            
+            // Append new books instead of clearing
+            for (const book of data.items) {
+                const bookElement = await renderer.createBookElement(book);
+                container.appendChild(bookElement);
+            }
+            
+            // Check if we have more results
+            hasMoreResults = data.items.length >= MAX_RESULTS;
+        }
+        
+        hideSpinner();
+        
+    } catch (error) {
+        console.error('Error fetching next batch:', error);
+        showToast("Failed to load more books.", "error");
+        const hideSpinner = () => {
+            sentinelElement.classList.add('hidden');
+            isFetching = false;
+        };
+        hideSpinner();
+    }
+}
