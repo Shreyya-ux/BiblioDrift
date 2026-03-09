@@ -8,6 +8,10 @@ from sqlalchemy.orm import joinedload
 from dotenv import load_dotenv
 import os
 from datetime import datetime, timedelta
+
+# Load environment variables from .env file BEFORE importing config
+load_dotenv()
+
 from config import app_config, setup_logging
 from ai_service import generate_book_note, get_ai_recommendations, get_book_mood_tags_safe, generate_chat_response, llm_service
 from models import db, User, Book, ShelfItem, BookNote, ReadingGoal, ReadingStats, Collection, CollectionItem, PriceHistory, PriceAlert, Review, register_user, login_user
@@ -48,9 +52,6 @@ from error_responses import (
     not_found_error, resource_exists_error, rate_limit_error,
     internal_error, service_unavailable_error
 )
-
-# Load environment variables from .env file
-load_dotenv()
 
 # Setup logging from configuration
 logger = setup_logging(app_config)
