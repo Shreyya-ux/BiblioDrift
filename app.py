@@ -7,6 +7,7 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 from sqlalchemy.orm import joinedload
 from dotenv import load_dotenv
 import os
+import logging
 from datetime import datetime, timedelta
 
 # Load environment variables from .env file BEFORE importing config
@@ -55,6 +56,18 @@ from error_responses import (
 
 # Setup logging from configuration
 logger = setup_logging(app_config)
+
+# Configure logging
+logging.basicConfig(
+    level=getattr(logging, os.getenv('LOG_LEVEL', 'INFO').upper()),
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler('bibliodrift.log') if os.getenv('LOG_FILE') else logging.NullHandler()
+    ]
+)
+
+logger = logging.getLogger(__name__)
 
 # Try to import enhanced mood analysis
 try:
@@ -344,7 +357,7 @@ def handle_generate_note():
         # Check cache
         cached_note = BookNote.query.filter_by(book_title=title, book_author=author).first()
         if cached_note:
-            print(f"Cache hit for {title} by {author}")
+            logger.debug(f"Cache hit for {title} by {author}")
             return success_response(data={"vibe": cached_note.content})
         
         # Generate AI recommendation with vibe context
@@ -364,7 +377,7 @@ def handle_generate_note():
                 db.session.add(new_note)
                 db.session.commit()
         except Exception as e:
-            print(f"Failed to cache note: {e}")
+            logger.error(f"Failed to cache note: {e}")
             db.session.rollback()
 
         return success_response(data=recommendation)
