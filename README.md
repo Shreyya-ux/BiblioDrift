@@ -124,4 +124,4 @@ We welcome contributions to make BiblioDrift cozier!
 MIT License.
 
 ---
-*Built with ☕ and code.*
+*Built by Devanshi Malhotra and contributors, with ☕ and code.*
