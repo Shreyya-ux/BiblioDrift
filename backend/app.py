@@ -3,7 +3,10 @@
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import (
+    JWTManager, create_access_token, jwt_required, 
+    get_jwt_identity, set_access_cookies, unset_jwt_cookies
+)
 from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import SQLAlchemyError
 from dotenv import load_dotenv
@@ -87,7 +90,7 @@ app = Flask(__name__, static_folder='.', static_url_path='')
 app.config.update(app_config.flask_config)
 
 jwt = JWTManager(app)
-CORS(app)
+CORS(app, supports_credentials=True)
 
 # Initialize cache service
 cache_service.init_app(app)
@@ -865,10 +868,9 @@ def register():
         # Create JWT token
         access_token = create_access_token(identity=str(user.id))
         
-        return success_response(
+        resp, status = success_response(
             data={
                 "message": "User registered successfully",
-                "access_token": access_token,
                 "user": {
                     "id": user.id,
                     "username": user.username,
@@ -877,6 +879,8 @@ def register():
             },
             status_code=201
         )
+        set_access_cookies(resp, access_token)
+        return resp, status
     except Exception as e:
         return validation_error(str(e))
 
@@ -902,10 +906,9 @@ def login():
             # Create JWT token
             access_token = create_access_token(identity=str(user.id))
             
-            return success_response(
+            resp, status = success_response(
                 data={
                     "message": "Login successful",
-                    "access_token": access_token,
                     "user": {
                         "id": user.id,
                         "username": user.username,
@@ -913,10 +916,20 @@ def login():
                     }
                 }
             )
+            set_access_cookies(resp, access_token)
+            return resp, status
             
         return auth_error("Invalid username or password")
     except Exception as e:
         return internal_error(str(e))
+
+
+@app.route('/api/v1/logout', methods=['POST'])
+def logout():
+    """Clear JWT cookies for logout."""
+    resp, status = success_response(message="Logout successful")
+    unset_jwt_cookies(resp)
+    return resp, status
 
 
 # ==================== READING STATS ENDPOINTS ====================
